@@ -1,18 +1,18 @@
-`timescale 1ps/1ps
+`timescale 1ns/1ps
 
-module tb2;
-logic         clk;
-logic         rstn;
-logic [31:0]  ch0_data;
-logic         ch0_valid;
+module tb1;
+logic          clk;
+bit            rstn;
+logic  [31:0]  ch0_data;
+logic          ch0_valid;
 logic         ch0_ready;
 logic [ 5:0]  ch0_margin;
-logic [31:0]  ch1_data;
-logic         ch1_valid;
+logic  [31:0]  ch1_data;
+logic          ch1_valid;
 logic         ch1_ready;
 logic [ 5:0]  ch1_margin;
-logic [31:0]  ch2_data;
-logic         ch2_valid;
+logic  [31:0]  ch2_data;
+logic          ch2_valid;
 logic         ch2_ready;
 logic [ 5:0]  ch2_margin;
 logic [31:0]  mcdt_data;
@@ -40,63 +40,38 @@ mcdt dut(
 );
 
 // clock generation
-// TODO:: please create task clk_gen(int peroid)
-task clk_gen();
+initial begin 
   clk <= 0;
   forever begin
-    #5 clk<= !clk;
+    #5 clk <= !clk;
   end
-endtask
-
-task clk_gen_self(int period);
-  clk <= 0;
-  forever begin
-    #(period/2) clk <= !clk;
-  end
-endtask
-
-initial begin
-  // generate clk
-  clk_gen_self(20);
 end
 
 // reset trigger
-// create task rstn_gen()
-task rstn_gen();
+initial begin 
   #10 rstn <= 0;
   repeat(10) @(posedge clk);
   rstn <= 1;
-endtask
-
-initial begin
-  // trigger rstn
-  rstn_gen();
 end
-
-// 错误的写法：在initial块中只能顺序调用task，不能并行调用task
-// 无论先调用哪一个都是错误的
-// initial begin
-//   // trigger rstn
-//   rstn_gen();
-//   clk_gen();
-// end
-
 
 // data test
 initial begin 
   @(posedge rstn);
   repeat(5) @(posedge clk);
   // channel 0 test
-  chnl_write(0, 'h00C0_0000);
-  chnl_write(0, 'h00C0_0001);
-  chnl_write(0, 'h00C0_0002);
-  chnl_write(0, 'h00C0_0003);
-  chnl_write(0, 'h00C0_0004);
-  chnl_write(0, 'h00C0_0005);
-  chnl_write(0, 'h00C0_0006);
-  chnl_write(0, 'h00C0_0007);
-  chnl_write(0, 'h00C0_0008);
-  chnl_write(0, 'h00C0_0009);
+  for(int i=0; i<100; i=i+1) begin
+    chnl_write(0, 8'h00C0_0000 + i);
+  end
+  // chnl_write(0, 'h00C0_0000);
+  // chnl_write(0, 'h00C0_0001);
+  // chnl_write(0, 'h00C0_0002);
+  // chnl_write(0, 'h00C0_0003);
+  // chnl_write(0, 'h00C0_0004);
+  // chnl_write(0, 'h00C0_0005);
+  // chnl_write(0, 'h00C0_0006);
+  // chnl_write(0, 'h00C0_0007);
+  // chnl_write(0, 'h00C0_0008);
+  // chnl_write(0, 'h00C0_0009);
   // channel 1 test
   chnl_write(1, 'h00C1_0000);
   chnl_write(1, 'h00C1_0001);
@@ -122,7 +97,7 @@ initial begin
 end
 
 // channel write task
-task chnl_write(input reg[1:0] id, input reg[31:0] data); 
+task chnl_write(input logic[1:0] id, input logic[31:0] data); 
   case(id)
     0: begin
       @(posedge clk);
@@ -151,7 +126,5 @@ task chnl_write(input reg[1:0] id, input reg[31:0] data);
     default: $error("channel id %0d is invalid", id);
   endcase
 endtask
-
-
 
 endmodule

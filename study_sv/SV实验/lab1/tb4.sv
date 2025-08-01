@@ -19,7 +19,12 @@ endfunction
 task chnl_write(input logic[31:0] data);
   // USER TODO
   // drive valid data
-  // ...
+  @(posedge clk);
+  ch_data <= data;
+  ch_valid <= 1;
+  // wait for ready signal
+  @(negedge clk);
+  wait(ch_ready);
 
   $display("%t channel initial [%s] sent data %x", $time, name, data);
   chnl_idle();
@@ -28,8 +33,9 @@ endtask
 task chnl_idle();
   // USER TODO
   // drive idle data
-  // ...
-
+  @(posedge clk);
+  ch_data <= 0;
+  ch_valid <= 0;
 endtask
 
 endmodule
@@ -94,7 +100,23 @@ logic [31:0] chnl2_arr[];
 // USER TODO
 // generate 100 data for each dynamic array
 initial begin
-  //...
+  // generate 100 data for channel 0
+  chnl0_arr = new[100];
+  foreach(chnl0_arr[i]) begin
+    chnl0_arr[i] = $urandom_range(0, 32'hFFFF_FFFF);
+  end
+
+  // generate 100 data for channel 1
+  chnl1_arr = new[100];
+  foreach(chnl1_arr[i]) begin
+    chnl1_arr[i] = $urandom_range(0, 32'hFFFF_FFFF);
+  end
+
+  // generate 100 data for channel 2
+  chnl2_arr = new[100];
+  foreach(chnl2_arr[i]) begin
+    chnl2_arr[i] = $urandom_range(0, 32'hFFFF_FFFF);
+  end
 end
 
 // USER TODO
@@ -105,29 +127,27 @@ initial begin
   repeat(5) @(posedge clk);
   // USER TODO
   // Give unique names to each channel initiator
-  // ...
-
+  chnl0_init.set_name("Channel 0");
+  chnl1_init.set_name("Channel 1");
+  chnl2_init.set_name("Channel 2");
 
   // channel 0 test
   // TODO use chnl0_arr to send all data
-  chnl0_init.chnl_write('h00C0_0000);
-  chnl0_init.chnl_write('h00C0_0001);
-  chnl0_init.chnl_write('h00C0_0002);
-  chnl0_init.chnl_write('h00C0_0003);
+  foreach(chnl0_arr[i]) begin
+    chnl0_init.chnl_write(chnl0_arr[i]);
+  end
 
   // channel 1 test
   // TODO use chnl1_arr to send all data
-  chnl1_init.chnl_write('h00C1_0000);
-  chnl1_init.chnl_write('h00C1_0001);
-  chnl1_init.chnl_write('h00C1_0002);
-  chnl1_init.chnl_write('h00C1_0003);
+  foreach(chnl1_arr[i]) begin
+    chnl1_init.chnl_write(chnl1_arr[i]);
+  end
 
   // channel 2 test
   // TODO use chnl2_arr to send all data
-  chnl2_init.chnl_write('h00C2_0000);
-  chnl2_init.chnl_write('h00C2_0001);
-  chnl2_init.chnl_write('h00C2_0002);
-  chnl2_init.chnl_write('h00C2_0003);
+  foreach(chnl2_arr[i]) begin
+    chnl2_init.chnl_write(chnl2_arr[i]);
+  end
 end
 
 chnl_initiator chnl0_init(

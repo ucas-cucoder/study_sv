@@ -57,9 +57,26 @@ end
 logic [31:0] chnl0_arr[];
 logic [31:0] chnl1_arr[];
 logic [31:0] chnl2_arr[];
-// USER TODO
+// USER TODO:finished
 // generate 100 data for each dynamic array
 initial begin
+  // generate 100 data for channel 0
+  chnl0_arr = new[100];
+  foreach(chnl0_arr[i]) begin
+    chnl0_arr[i] = $urandom_range(0, 32'hFFFF_FFFF);
+  end
+
+  // generate 100 data for channel 1
+  chnl1_arr = new[100];
+  foreach(chnl1_arr[i]) begin
+    chnl1_arr[i] = $urandom_range(0, 32'hFFFF_FFFF);
+  end
+
+  // generate 100 data for channel 2
+  chnl2_arr = new[100];
+  foreach(chnl2_arr[i]) begin
+    chnl2_arr[i] = $urandom_range(0, 32'hFFFF_FFFF);
+  end
 end
 
 // USER TODO
@@ -70,12 +87,21 @@ initial begin
   repeat(5) @(posedge clk);
   // channel 0 test
   // TODO use chnl0_arr to send all data
+  foreach(chnl0_arr[i]) begin
+    chnl_write(0, chnl0_arr[i]);
+  end
 
   // channel 1 test
   // TODO use chnl1_arr to send all data
+  foreach(chnl1_arr[i]) begin
+    chnl_write(1, chnl1_arr[i]);
+  end
 
   // channel 2 test
   // TODO use chnl2_arr to send all data
+  foreach(chnl2_arr[i]) begin
+    chnl_write(2, chnl2_arr[i]);
+  end
 
 end
 
